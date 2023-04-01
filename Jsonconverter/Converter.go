@@ -12,7 +12,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
-//Go-datatypes
+
+// Go-datatypes
 var (
 	s_struct      = " struct{\n"
 	s_array       = " []"
@@ -22,7 +23,8 @@ var (
 	s_interface   = " interface{}\n"
 	s_close_curly = "\n}\n"
 )
-//Checks for different conditions
+
+// Checks for different conditions
 var arr_alert bool
 var arr_struct_alert bool
 var garbage bool
@@ -95,21 +97,21 @@ func Converter() {
 			Value := split[1]
 			Value = checkdatatype(Value)
 			mystruct += key + Value
-		}else if (arr_check) && strings.Contains(text[i], "]") {
+		} else if (arr_check) && strings.Contains(text[i], "]") {
 			fmt.Println("dddddddd == ", datastore)
-				arr_check = false
-				var data string
-				for i := 0; i < len(datastore); i++ {
-					if datastore[i] == datastore[0] {
-						data = datastore[0]
-						fmt.Println("aaaaa = ",data) 
-					} else {
-						data = s_interface
-						fmt.Println("aaaaa = ",data) 
-					}
+			arr_check = false
+			var data string
+			for i := 0; i < len(datastore); i++ {
+				if datastore[i] == datastore[0] {
+					data = datastore[0]
+					fmt.Println("aaaaa = ", data)
+				} else {
+					data = s_interface
+					fmt.Println("aaaaa = ", data)
 				}
-				mystruct += data
-				datastore = nil
+			}
+			mystruct += data
+			datastore = nil
 			arr_var_check, arr_alert, arr_var_check, garbage = false, false, false, false
 		} else if !arr_alert {
 			if strings.Contains(text[i], `}`) {
@@ -132,9 +134,15 @@ func Converter() {
 			fmt.Println(arr_struct_alert, arr_var_check)
 		} else if !garbage && !arr_var_check && arr_struct_alert {
 			fmt.Println("=!!!!!!!", text[i])
-			if strings.Contains(text[i], `[`) {
+			// if strings.Contains(text[i], `[`) {
+			// 	arr_var_check = false
+			// }
+			if strings.Contains(text[i], `{`) && strings.Contains(text[i-1], `[`) {
+				arr_var_check = false
+				mystruct += s_struct
+			} else if !strings.Contains(text[i], `{`) && strings.Contains(text[i-1], `[`) {
 				arr_var_check = true
-			} 
+			}
 			if strings.Contains(text[i], ":") {
 				fmt.Println("inside = ", text[i])
 				split := strings.Split(text[i], ":")
@@ -145,12 +153,14 @@ func Converter() {
 				mystruct += key + Value
 			} else if strings.Contains(text[i], `}`) {
 				fmt.Println("struct_array", text[i])
-				// mystruct += s_close_curly
+
+				mystruct += s_close_curly
 				garbage = true
 				arr_struct_alert = false
 			}
 		} else if arr_var_check && arr_alert && arr_struct_alert && !strings.Contains(text[i], `]`) {
 			val := strings.TrimSpace(text[i])
+			fmt.Println("**********************", val)
 			data := checkdatatype(val)
 			datastore = append(datastore, data)
 			fmt.Println("know data", val, data, text[i])
@@ -173,21 +183,19 @@ func Converter() {
 		} else if (garbage) && strings.Contains(text[i], `}`) && !strings.Contains(text[i], `,`) {
 			fmt.Println("garbage = ", text[i])
 			arr_may_end = true
-			// mystruct += text[i]+"\n"
-			// arr_var_check, arr_alert, arr_var_check, garbage = false, false, false, false
 		} else if arr_var_check && arr_check {
 			fmt.Println("going", text[i])
 			val := strings.TrimSpace(text[i])
 			data := checkdatatype(val)
 			datastore = append(datastore, data)
 			fmt.Println("getmydata", datastore)
-			
-		}else if (arr_may_end){
-			if strings.Contains(text[i],`]`){
+
+		} else if arr_may_end {
+			if strings.Contains(text[i], `]`) {
 				close_arr = true
-				mystruct += s_close_curly+"\n"
-			arr_var_check, arr_alert, arr_var_check, garbage,arr_check,arr_may_end = false,false,false, false, false, false
-			}else{
+				mystruct += s_close_curly + "\n"
+				arr_var_check, arr_alert, arr_var_check, garbage, arr_check, arr_may_end = false, false, false, false, false, false
+			} else {
 				fmt.Println("OOPs! it's not an end")
 			}
 		}
@@ -196,6 +204,9 @@ func Converter() {
 	WriteFile(mystruct)
 
 }
+
+// TODO
+// *fix closing
 func IsLetter(s string) string {
 	str := ""
 	s = strings.TrimSpace(s)
@@ -229,6 +240,19 @@ func checkdatatype(s string) string {
 	}
 	return str
 }
-func WriteFile(string){
-	_ = os.WriteFile("Go_example_struct.go", []byte(mystruct), 0644)
+func WriteFile(string) {
+	validate := string(mystruct)
+	opencurlycount := strings.Count(validate, `{`)
+	closecurlycount := strings.Count(validate, `}`)
+	totalCount := opencurlycount - closecurlycount
+	validate = strings.TrimSpace(validate)
+	if totalCount != 0 {
+		lastchar := validate[len(validate)-1]
+		fmt.Println("this is my lastchar = ", string(lastchar))
+		mystruct = strings.Replace(validate, string(lastchar), "", 1)
+		fmt.Println("New Struct:", validate)
+		_ = os.WriteFile("Go_example_struct.go", []byte(mystruct), 0644)
+	} else {
+		_ = os.WriteFile("Go_example_struct.go", []byte(mystruct), 0644)
+	}
 }
