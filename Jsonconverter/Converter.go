@@ -44,7 +44,7 @@ func ValidateJson(c *gin.Context) {
 	}
 	content := string(databyte)
 	content = strings.TrimSpace(content)
-	_ = ioutil.WriteFile("json_example_write.txt", []byte(content), 0644)
+	_ = ioutil.WriteFile("json_example_write.json", []byte(content), 0644)
 	res1 := strings.HasPrefix(content, `{`)
 	res2 := strings.HasSuffix(content, `}`)
 	if !res1 || !res2 {
@@ -72,7 +72,7 @@ func ValidateJson(c *gin.Context) {
 
 }
 func ReadFile() []string {
-	file, err := os.Open("json_example_write.txt")
+	file, err := os.Open("json_example_write.json")
 	if err != nil {
 		log.Fatalf("failed to open")
 
