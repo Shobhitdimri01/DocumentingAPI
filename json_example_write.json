@@ -1,7 +1,16 @@
 {
     "Matter":2,
+    "Random":"fire",
+
+
+    
     "Hobbies":[
         "playing",
         "chess"
-    ]
+    ],
+    "Games":2
+
+
+
+
 }
