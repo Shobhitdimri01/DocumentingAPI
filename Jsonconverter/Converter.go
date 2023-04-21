@@ -35,7 +35,17 @@ var close_arr bool
 var datastore []string
 
 var mystruct string
-
+// Validate Json godoc
+// @Summary      Show an account
+// @Description  get string by ID
+// @Tags         accounts
+// @Param        user_id    query     string  false  "enter user id"  Format(email)
+// @Accept       json
+// @Success      200  {object}  string "success"
+// @Failure      400  {object}  string "error"
+// @Failure      404  {object}  string "error"
+// @Failure      500  {object}  string "error"
+// @Router       /user/{user_id} [GET]
 func ValidateJson(c *gin.Context) {
 	databyte, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
